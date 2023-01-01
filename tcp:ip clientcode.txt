@@ -1,0 +1,48 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+#define PORTNUM 9174
+int main(){
+
+        int sd,nsd,len,clien,n;
+        struct sockaddr_in sin,clin;
+        char buf[1024];
+
+        sd=socket(AF_INET,SOCK_STREAM,0);
+
+        memset((char *)&sin,0,sizeof(sin));
+
+        sin.sin_family=AF_INET;
+        sin.sin_port=htons(PORTNUM);
+        sin.sin_addr.s_addr=inet_addr("203.250.148.46");
+
+        if(connect(sd,(struct sockaddr *)&sin,sizeof(sin))==-1){
+                perror("connect");
+                exit(1);
+        }
+
+        while(1){
+        if((n=recv(sd,buf,sizeof(buf),0))==-1){
+                perror("recv");
+                exit(1);
+        }
+        buf[n]='\0';
+        printf("From server: %s\n",buf);
+        printf("To server:  \n");
+        n=read(0,buf,sizeof(buf));
+        buf[n]='\0';
+
+        if(send(sd,buf,n+1,0)==-1){
+                perror("send");
+                exit(1);
+        }
+        }
+        close(sd);
+
+}
